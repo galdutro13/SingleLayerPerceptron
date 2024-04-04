@@ -1,91 +1,130 @@
 #include <iostream>
 #include <vector>
 #include <numeric>
+#include <algorithm>
+#include <iterator>
 
 class SingleLayerPerceptron {
 private:
-    const int dimention;
-    const int numb_classes;
+    const int dimension;
+    const int num_classes;
 
     std::vector<std::vector<double>> weights;
-    std::vector<double> bweight;
+    std::vector<double> bias_weight;
     double learning_rate;
 
     const double theta;
-    const double bias = 1.0;
 
-    // Função responsavel por atualizar os pesos da rede neural
-    bool ch_weights(const std::vector<int>& OUT, const std::vector<int>& target, const std::vector<int>& data){
-        bool wchanged = false; // Variavel que indica se os pesos foram alterados
-        for(int i = 0; i < numb_classes; ++i) { // Loop para cada classe
-            if(OUT[i] != target[i] && learning_rate != 0 && target[i] != 0) { // Verifica se a saida da rede neural é diferente do target
-                wchanged = true; // Indica que os pesos foram alterados
-                for(int j = 0; j < dimention; ++j) { // Loop para cada dimensão
-                    weights[i][j] += learning_rate * target[i] * data[j]; // Atualiza os pesos
+    /**
+ * This function calculates the output of the activation function for a given data point, weights, and bias.
+ * It calculates the dot product of the data and weights, adds the bias, and then applies the activation function.
+ * The activation function is a step function that returns 1 if the net input is greater than a threshold theta,
+ * -1 if the net input is less than theta - 1, and 0 otherwise.
+ *
+ * @param data A vector of integers representing a data point from the dataset.
+ * @param weight A vector of doubles representing the weights of the model.
+ * @param bias A double representing the bias of the model.
+ * @return An integer representing the output of the activation function.
+ */
+    [[nodiscard]] int act_func(const std::vector<int> &data, const std::vector<double> &weight, double bias) const {
+        // Calculate the dot product of the data and weights, and add the bias
+        double net = std::inner_product(data.begin(), data.end(), weight.begin(), bias);
+
+        // Apply the activation function and return the result
+        return (net > theta) ? 1 : ((net >= theta - 1) ? 0 : -1);
+    }
+
+    /**
+ * This function is responsible for updating the weights and bias of the model based on the difference between the predicted and actual output.
+ * It checks if the predicted output is not equal to the actual output and if the learning rate and the actual output are not zero.
+ * If these conditions are met, it updates the weights by adding the product of the learning rate, the actual output, and the data value to the current weight.
+ * It also updates the bias by adding the product of the learning rate and the actual output to the current bias.
+ *
+ * @param data A vector of integers representing a data point from the dataset.
+ * @param target An integer representing the actual output for the data point.
+ * @param output An integer representing the predicted output for the data point.
+ * @param weight A vector of doubles representing the weights of the model.
+ * @param bias A double representing the bias of the model.
+ */
+    void ch_weights(const std::vector<int> &data, int target, int output, std::vector<double> &weight, double &bias) const {
+        // Check if the predicted output is not equal to the actual output and if the learning rate and the actual output are not zero
+        if (output != target && learning_rate != 0 && target != 0) {
+            // Update the weights by adding the product of the learning rate, the actual output, and the data value to the current weight
+            std::transform(data.begin(), data.end(), weight.begin(), weight.begin(),
+                           [&](int data_val, double weight_val) {
+                               return weight_val + learning_rate * target * data_val;
+                           });
+            // Update the bias by adding the product of the learning rate and the actual output to the current bias
+            bias += learning_rate * target;
+        }
+    }
+
+    /**
+ * This function is responsible for training the perceptron model.
+ * It iterates over the dataset and updates the weights and bias of the model based on the difference between the predicted and actual output.
+ * The function returns a boolean indicating whether the weights of the model were changed during the training process.
+ *
+ * @param dataset A 2D vector of integers representing the training data.
+ * @param target A 2D vector of integers representing the target output for each data point in the dataset.
+ * @return A boolean indicating whether the weights of the model were changed during the training process.
+ */
+    bool internal_train(const std::vector<std::vector<int>> &dataset, const std::vector<std::vector<int>> &target) {
+        // Initialize a boolean to keep track of whether the weights were changed during the training process
+        bool weights_changed = false;
+
+        // Create an iterator for the target vector
+        auto target_iter = target.begin();
+
+        // Iterate over the dataset
+        for (const auto &data: dataset) {
+            // For each data point, iterate over the number of classes
+            for (int i = 0; i < num_classes; ++i) {
+                // Calculate the output of the activation function for the current data point and weights
+                int output = act_func(data, weights[i], bias_weight[i]);
+
+                // Update the weights and bias based on the difference between the predicted and actual output
+                ch_weights(data, (*target_iter)[i], output, weights[i], bias_weight[i]);
+
+                // If the predicted output does not match the actual output, set weights_changed to true
+                if (output != (*target_iter)[i]) {
+                    weights_changed = true;
                 }
-                bweight[i] += learning_rate * target[i]; // Atualiza os pesos do bias
-            }
-        }
-        return wchanged; // Retorna se os pesos foram alterados
-    }
-
-    // Função de ativação
-    [[nodiscard]] inline int act_func(double y_in) const {
-        return (y_in > theta) ? 1 : ((y_in >= theta - 1) ? 0 : -1);
-    }
-
-    // Essa função implementa o loop interno do algoritmo de treinamento
-    bool i_train(const std::vector<std::vector<int>>& dataset, const std::vector<std::vector<int>>& target) {
-        bool wchanged = false; // Variavel que indica se os pesos foram alterados
-        int j = 0;
-
-        // Loop do algoritmo de treinamento
-        for(const auto& data : dataset) {
-            std::vector<int> OUT(numb_classes); // Vetor de saida da rede neural
-
-            // Calculo da saida da rede neural
-            for(int i = 0; i < numb_classes; ++i) {
-                // Calculo do dotproduct entre os pesos e os dados de entrada
-                double NET = std::inner_product(data.begin(), data.end(), weights[i].begin(), bweight[i] * bias);
-                OUT[i] = act_func(NET); // Função de ativação
             }
 
-            // Atualização dos pesos
-            wchanged |= ch_weights(OUT, target[j], data);
-            ++j;
+            // Move to the next target output
+            ++target_iter;
         }
-        return wchanged;
+
+        // Return whether the weights were changed during the training process
+        return weights_changed;
     }
 
 public:
-    // Construtor
-    SingleLayerPerceptron(int dimention, int numb_classes, double learning_rate, double theta)
-            : dimention(dimention), numb_classes(numb_classes), learning_rate(learning_rate), theta(theta),
-              weights(numb_classes, std::vector<double>(dimention, 0.0)),
-              bweight(numb_classes, 0.0) {}
+    SingleLayerPerceptron(int dimension, int num_classes, double learning_rate, double theta)
+            : dimension(dimension), num_classes(num_classes), learning_rate(learning_rate), theta(theta),
+              weights(num_classes, std::vector<double>(dimension, 0.0)),
+              bias_weight(num_classes, 0.0) {}
 
-    void train(const std::vector<std::vector<int>>& dataset, const std::vector<std::vector<int>>& target) {
-        while (i_train(dataset, target));
+    void train(const std::vector<std::vector<int>> &dataset, const std::vector<std::vector<int>> &target) {
+        while (internal_train(dataset, target));
     }
 
-    std::vector<int> predict(const std::vector<int>& data) {
-        std::vector<int> OUT;
-        OUT.reserve(numb_classes);
-        for(int i = 0; i < numb_classes; ++i) {
-            double NET = std::inner_product(data.begin(), data.end(), weights[i].begin(), bweight[i] * bias);
-            OUT.emplace_back(act_func(NET));
+    std::vector<int> predict(const std::vector<int> &data) {
+        std::vector<int> output(num_classes);
+        for (int i = 0; i < num_classes; ++i) {
+            output[i] = act_func(data, weights[i], bias_weight[i]);
         }
-        return OUT;
+        return output;
     }
 
     void print_weights() const {
-        for(int i = 0; i < numb_classes; ++i) {
-            std::cout << "Neuron " << i + 1 << ":\n";
+        int neuron_num = 1;
+        for (const auto &weight: weights) {
+            std::cout << "Neuron " << neuron_num++ << ":" << std::endl;
             std::cout << "Weights: ";
-            for(auto w : weights[i]) {
-                std::cout << w << ", ";
-            }
-            std::cout << "\nBias weight: " << bweight[i] << "\n";
+            std::copy(weight.begin(), weight.end(), std::ostream_iterator<double>(std::cout, ", "));
+            std::cout << std::endl;
+            std::cout << "Bias weight: " << bias_weight[neuron_num - 2] << std::endl;
         }
     }
 };
@@ -99,8 +138,8 @@ int main() {
     };
 
     std::vector<std::vector<int>> target = {
-            {1, 1},
-            {1, -1},
+            {1,  1},
+            {1,  -1},
             {-1, 1},
             {-1, -1}
     };
