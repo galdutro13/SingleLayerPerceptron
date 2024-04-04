@@ -1,0 +1,19 @@
+# ninja log v5
+1	1459	7339729254608090	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+1463	1918	7339729259161551	SingleLayerPerceptron.exe	660a836c2cbf219e
+5	1015	7339731364140774	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+1015	1184	7339731365766156	SingleLayerPerceptron.exe	660a836c2cbf219e
+4	975	7339731602351984	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+976	1124	7339731603768594	SingleLayerPerceptron.exe	660a836c2cbf219e
+4	939	7339731887463289	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+940	1100	7339731889012887	SingleLayerPerceptron.exe	660a836c2cbf219e
+5	909	7339731996807110	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+910	1069	7339731998321605	SingleLayerPerceptron.exe	660a836c2cbf219e
+4	915	7339732383571764	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+915	1067	7339732385039919	SingleLayerPerceptron.exe	660a836c2cbf219e
+3	1061	7339750981650049	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+1062	1228	7339750983354475	SingleLayerPerceptron.exe	660a836c2cbf219e
+4	978	7339751319583864	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+979	1131	7339751321067165	SingleLayerPerceptron.exe	660a836c2cbf219e
+4	860	7339768670595363	CMakeFiles/SingleLayerPerceptron.dir/main.cpp.obj	3c7482f29d429916
+861	1020	7339768672143327	SingleLayerPerceptron.exe	660a836c2cbf219e

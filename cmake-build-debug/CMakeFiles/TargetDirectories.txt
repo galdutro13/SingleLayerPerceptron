@@ -1,0 +1,3 @@
+C:/Users/galdu/workspace/SingleLayerPerceptron/cmake-build-debug/CMakeFiles/SingleLayerPerceptron.dir
+C:/Users/galdu/workspace/SingleLayerPerceptron/cmake-build-debug/CMakeFiles/edit_cache.dir
+C:/Users/galdu/workspace/SingleLayerPerceptron/cmake-build-debug/CMakeFiles/rebuild_cache.dir
