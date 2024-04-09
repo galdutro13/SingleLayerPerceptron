@@ -3,6 +3,10 @@
 #include <numeric>
 #include <algorithm>
 #include <iterator>
+#include <fstream>
+#include <sstream>
+#include <string>
+#include <utility>
 
 class SingleLayerPerceptron {
 private:
@@ -27,10 +31,10 @@ private:
  * @return An integer representing the output of the activation function.
  */
     [[nodiscard]] int act_func(const std::vector<int> &data, const std::vector<double> &weight, double bias) const {
-        // Calculate the dot product of the data and weights, and add the bias
+        // Calcula o produto escalar entre os dados e os pesos, e adiciona o bias
         double net = std::inner_product(data.begin(), data.end(), weight.begin(), bias);
 
-        // Apply the activation function and return the result
+        // Aplica a função de ativação e retorna o resultado
         return (net > theta) ? 1 : ((net >= theta - 1) ? 0 : -1);
     }
 
@@ -47,14 +51,14 @@ private:
  * @param bias A double representing the bias of the model.
  */
     void ch_weights(const std::vector<int> &data, int target, int output, std::vector<double> &weight, double &bias) const {
-        // Check if the predicted output is not equal to the actual output and if the learning rate and the actual output are not zero
+        // Verifica se a saída prevista não é igual à saída esperada e se a taxa de aprendizagem e a saída esperada não são zero.
         if (output != target && learning_rate != 0 && target != 0) {
-            // Update the weights by adding the product of the learning rate, the actual output, and the data value to the current weight
+            // Atualiza os pesos adicionando o produto da taxa de aprendizagem, a saída esperada e o valor dos dados ao peso atual.
             std::transform(data.begin(), data.end(), weight.begin(), weight.begin(),
                            [&](int data_val, double weight_val) {
                                return weight_val + learning_rate * target * data_val;
                            });
-            // Update the bias by adding the product of the learning rate and the actual output to the current bias
+            // Atualiza o bias adicionando o produto da taxa de aprendizagem e a saída real ao bias atual.
             bias += learning_rate * target;
         }
     }
@@ -129,6 +133,42 @@ public:
     }
 };
 
+std::pair<std::vector<std::vector<int>>, std::vector<std::vector<int>>> readData(const std::string& filename, int num_data_columns) {
+    std::ifstream file(filename);
+    std::string line;
+    std::vector<std::vector<int>> data;
+    std::vector<std::vector<int>> labels;
+
+    while (std::getline(file, line)) {
+        std::istringstream ss(line);
+        std::string value;
+        std::vector<int> row;
+        std::vector<int> label;
+
+        for (int i = 0; i < num_data_columns; ++i) {
+            std::getline(ss, value, ',');
+            // Check for and remove BOM
+            if (!value.empty() && value[0] == '\xEF' && value[1] == '\xBB' && value[2] == '\xBF') {
+                value = value.substr(3);
+            }
+            row.push_back(std::stoi(value));
+        }
+
+        while (std::getline(ss, value, ',')) {
+            // Check for and remove BOM
+            if (!value.empty() && value[0] == '\xEF' && value[1] == '\xBB' && value[2] == '\xBF') {
+                value = value.substr(3);
+            }
+            label.push_back(std::stoi(value));
+        }
+
+        data.push_back(row);
+        labels.push_back(label);
+    }
+
+    return {data, labels};
+}
+
 int main() {
     std::vector<std::vector<int>> dataset = {
             {1, 1},
@@ -148,6 +188,12 @@ int main() {
     slp.print_weights();
     slp.train(dataset, target);
     slp.print_weights();
+
+    auto [data, labels] = readData("caracteres-limpo.csv", 63);
+
+    SingleLayerPerceptron slp_letras(63, labels[0].size(), 1, 0.2);
+    slp_letras.train(data, labels);
+    slp_letras.print_weights();
 
     return 0;
 }
