@@ -10,7 +10,7 @@
 
 class SingleLayerPerceptron {
 private:
-    const int dimension;
+    [[maybe_unused]] const int dimension;
     const int num_classes;
 
     std::vector<std::vector<double>> weights;
@@ -124,11 +124,11 @@ public:
     void print_weights() const {
         int neuron_num = 1;
         for (const auto &weight: weights) {
-            std::cout << "Neuron " << neuron_num++ << ":" << std::endl;
-            std::cout << "Weights: ";
+            std::cout << "Neuronio " << neuron_num++ << ":" << std::endl;
+            std::cout << "Peso: ";
             std::copy(weight.begin(), weight.end(), std::ostream_iterator<double>(std::cout, ", "));
             std::cout << std::endl;
-            std::cout << "Bias weight: " << bias_weight[neuron_num - 2] << std::endl;
+            std::cout << "Peso do bias: " << bias_weight[neuron_num - 2] << std::endl;
         }
     }
 };
@@ -191,9 +191,20 @@ int main() {
 
     auto [data, labels] = readData("caracteres-limpo.csv", 63);
 
-    SingleLayerPerceptron slp_letras(63, labels[0].size(), 1, 0.2);
+    SingleLayerPerceptron slp_letras(63, static_cast<int>(labels[0].size()), 1, 0.2);
     slp_letras.train(data, labels);
     slp_letras.print_weights();
+
+    auto [test_data, test_labels] = readData("caracteres-ruido.csv", 63);
+
+    for (int i = 0; i < test_data.size(); ++i) {
+        auto output = slp_letras.predict(test_data[i]);
+        std::cout << "Predicao: ";
+        std::copy(output.begin(), output.end(), std::ostream_iterator<int>(std::cout, ", "));
+        std::cout << "\tEsperado: ";
+        std::copy(test_labels[i].begin(), test_labels[i].end(), std::ostream_iterator<int>(std::cout, ", "));
+        std::cout << std::endl;
+    }
 
     return 0;
 }
