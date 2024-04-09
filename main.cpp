@@ -20,16 +20,16 @@ private:
     const double theta;
 
     /**
- * This function calculates the output of the activation function for a given data point, weights, and bias.
- * It calculates the dot product of the data and weights, adds the bias, and then applies the activation function.
- * The activation function is a step function that returns 1 if the net input is greater than a threshold theta,
- * -1 if the net input is less than theta - 1, and 0 otherwise.
- *
- * @param data A vector of integers representing a data point from the dataset.
- * @param weight A vector of doubles representing the weights of the model.
- * @param bias A double representing the bias of the model.
- * @return An integer representing the output of the activation function.
- */
+      * Esta função calcula a saída da função de ativação para um determinado ponto de dados, pesos e bias.
+      * Ela calcula o produto escalar entre os dados e os pesos, adiciona o bias e, em seguida, aplica a função de ativação.
+      * A função de ativação é uma função de passo (step function) que retorna 1 se a entrada líquida for maior que um limite theta,
+      * -1 se a entrada líquida for menor que theta - 1, e 0 nos demais casos.
+      *
+      * @param data Um vetor de inteiros representando um ponto de dados do conjunto de dados.
+      * @param weight Um vetor de números decimais representando os pesos do modelo.
+      * @param bias Um número decimal representando o bias do modelo.
+      * @return Um inteiro representando a saída da função de ativação.
+      */
     [[nodiscard]] int act_func(const std::vector<int> &data, const std::vector<double> &weight, double bias) const {
         // Calcula o produto escalar entre os dados e os pesos, e adiciona o bias
         double net = std::inner_product(data.begin(), data.end(), weight.begin(), bias);
@@ -39,17 +39,17 @@ private:
     }
 
     /**
- * This function is responsible for updating the weights and bias of the model based on the difference between the predicted and actual output.
- * It checks if the predicted output is not equal to the actual output and if the learning rate and the actual output are not zero.
- * If these conditions are met, it updates the weights by adding the product of the learning rate, the actual output, and the data value to the current weight.
- * It also updates the bias by adding the product of the learning rate and the actual output to the current bias.
- *
- * @param data A vector of integers representing a data point from the dataset.
- * @param target An integer representing the actual output for the data point.
- * @param output An integer representing the predicted output for the data point.
- * @param weight A vector of doubles representing the weights of the model.
- * @param bias A double representing the bias of the model.
- */
+      * Esta função é responsável por atualizar os pesos e o bias do modelo com base na distância entre a saída prevista e a saída real.
+      * Ela verifica se a saída prevista não é igual à saída real e se a taxa de aprendizado e a saída real não são zero.
+      * Caso estas condições sejam atendidas, atualiza os pesos adicionando o produto da taxa de aprendizado, a saída real e o valor dos dados ao peso atual.
+      * Também atualiza o bias adicionando o produto da taxa de aprendizado e a saída real ao bias atual.
+      *
+      * @param data Um vetor de inteiros representando um ponto de dado do conjunto de dados.
+      * @param target Um inteiro representando a saída real para o ponto de dado.
+      * @param output Um inteiro representando a saída prevista para o ponto de dado.
+      * @param weight Um vetor de números decimais representando os pesos do modelo.
+      * @param bias Um número decimal representando o bias do modelo.
+      */
     void ch_weights(const std::vector<int> &data, int target, int output, std::vector<double> &weight, double &bias) const {
         // Verifica se a saída prevista não é igual à saída esperada e se a taxa de aprendizagem e a saída esperada não são zero.
         if (output != target && learning_rate != 0 && target != 0) {
@@ -64,42 +64,42 @@ private:
     }
 
     /**
- * This function is responsible for training the perceptron model.
- * It iterates over the dataset and updates the weights and bias of the model based on the difference between the predicted and actual output.
- * The function returns a boolean indicating whether the weights of the model were changed during the training process.
- *
- * @param dataset A 2D vector of integers representing the training data.
- * @param target A 2D vector of integers representing the target output for each data point in the dataset.
- * @return A boolean indicating whether the weights of the model were changed during the training process.
- */
+      * Essa função é responsável por treinar o modelo perceptron.
+      * Ela itera através do conjunto de dados e atualiza os pesos e o bias do modelo baseando-se na distância entre as saídas previstas e reais.
+      * A função retorna um valor booleano indicando se os pesos do modelo foram alterados durante o processo de treinamento.
+      *
+      * @param dataset Um vetor 2D de números inteiros representando os dados de treinamento.
+      * @param target Um vetor 2D de números inteiros representando a saída desejada para cada ponto de dados no dataset.
+      * @return Um valor booleano indicando se os pesos do modelo foram alterados durante o processo de treinamento.
+      */
     bool internal_train(const std::vector<std::vector<int>> &dataset, const std::vector<std::vector<int>> &target) {
-        // Initialize a boolean to keep track of whether the weights were changed during the training process
+        // Inicializa uma variável booleana para acompanhar se os pesos foram alterados durante o processo de treinamento.
         bool weights_changed = false;
 
-        // Create an iterator for the target vector
+        // Cria um iterador para o vetor target (alvo)
         auto target_iter = target.begin();
 
-        // Iterate over the dataset
+        // Itera sobre o conjunto de dados
         for (const auto &data: dataset) {
-            // For each data point, iterate over the number of classes
+            // Para cada ponto de dados, itera sobre o número de classes
             for (int i = 0; i < num_classes; ++i) {
-                // Calculate the output of the activation function for the current data point and weights
+                // Calcula a saída da função de ativação para o ponto de dados atual e os pesos
                 int output = act_func(data, weights[i], bias_weight[i]);
 
-                // Update the weights and bias based on the difference between the predicted and actual output
+                // Atualiza os pesos e o bias com base na diferença entre a saída prevista e a saída real
                 ch_weights(data, (*target_iter)[i], output, weights[i], bias_weight[i]);
 
-                // If the predicted output does not match the actual output, set weights_changed to true
+                // Se a saída prevista não corresponder à saída real, define 'weights_changed' como verdadeiro
                 if (output != (*target_iter)[i]) {
                     weights_changed = true;
                 }
             }
 
-            // Move to the next target output
+            // Passa para a próxima saída alvo
             ++target_iter;
         }
 
-        // Return whether the weights were changed during the training process
+        // Retorna se os pesos foram alterados durante o processo de treinamento
         return weights_changed;
     }
 
